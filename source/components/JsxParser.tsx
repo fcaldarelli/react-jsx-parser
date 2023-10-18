@@ -7,6 +7,7 @@ import { canHaveChildren, canHaveWhitespace } from '../constants/specialTags'
 import { randomHash } from '../helpers/hash'
 import { parseStyle } from '../helpers/parseStyle'
 import { resolvePath } from '../helpers/resolvePath'
+import { Text, View } from 'react-native'
 
 type ParsedJSX = JSX.Element | boolean | string
 type ParsedTree = ParsedJSX | ParsedJSX[] | null
@@ -37,7 +38,7 @@ export default class JsxParser extends React.Component<TProps> {
 		allowUnknownElements: true,
 		autoCloseVoidElements: false,
 		bindings: {},
-		blacklistedAttrs: [/^on.+/i],
+		blacklistedAttrs: [], /* [/^on.+/i], */
 		blacklistedTags: ['script'],
 		className: '',
 		components: {},
@@ -91,7 +92,7 @@ export default class JsxParser extends React.Component<TProps> {
 			const key = this.props.disableKeyGeneration ? undefined : randomHash()
 			return this.props.disableFragments
 				? expression.value
-				: <Fragment key={key}>{expression.value}</Fragment>
+				: <Text key={key}>{expression.value}</Text>
 		case 'ArrayExpression':
 			return expression.elements.map(ele => this.#parseExpression(ele, scope)) as ParsedTree
 		case 'BinaryExpression':
@@ -241,9 +242,6 @@ export default class JsxParser extends React.Component<TProps> {
 		const blacklistedTags = (this.props.blacklistedTags || [])
 			.map(tag => tag.trim().toLowerCase()).filter(Boolean)
 
-		if (/^(html|head|body)$/i.test(name)) {
-			return childNodes.map(c => this.#parseElement(c, scope)) as JSX.Element[]
-		}
 		const tagName = name.trim().toLowerCase()
 		if (blacklistedTags.indexOf(tagName) !== -1) {
 			onError!(new Error(`The tag <${name}> is blacklisted, and will not be rendered.`))
@@ -256,7 +254,7 @@ export default class JsxParser extends React.Component<TProps> {
 				return this.props.renderUnrecognized!(name)
 			}
 
-			if (!allowUnknownElements && document.createElement(name) instanceof HTMLUnknownElement) {
+			if (!allowUnknownElements) {
 				onError!(new Error(`The tag <${name}> is unrecognized in this browser, and will not be rendered.`))
 				return this.props.renderUnrecognized!(name)
 			}
@@ -333,15 +331,12 @@ export default class JsxParser extends React.Component<TProps> {
 	}
 
 	render = (): JSX.Element => {
-		const jsx = (this.props.jsx || '').trim().replace(/<!DOCTYPE([^>]*)>/g, '')
+		const jsx = (this.props.jsx || '').trim();
 		this.ParsedChildren = this.#parseJSX(jsx)
-		const className = [...new Set(['jsx-parser', ...String(this.props.className).split(' ')])]
-			.filter(Boolean)
-			.join(' ')
 
 		return (
 			this.props.renderInWrapper
-				? <div className={className}>{this.ParsedChildren}</div>
+				? <View>{this.ParsedChildren}</View>
 				: <>{this.ParsedChildren}</>
 		)
 	}
