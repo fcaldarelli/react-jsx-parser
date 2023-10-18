@@ -3,7 +3,7 @@
   "bugs": "https://github.com/TroyAlford/react-jsx-parser/issues",
   "description": "A React component which can parse JSX and output rendered React Components",
   "files": [
-    "dist/"
+    "source/"
   ],
   "keywords": [
     "react",
