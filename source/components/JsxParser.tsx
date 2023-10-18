@@ -59,7 +59,7 @@ export default class JsxParser extends React.Component<TProps> {
 		const parser = Acorn.Parser.extend(AcornJSX.default({
 			autoCloseVoidElements: this.props.autoCloseVoidElements,
 		}))
-		const wrappedJsx = `<root>${jsx}</root>`
+		const wrappedJsx = `<Text>${jsx}</Text>`
 		let parsed: AcornJSX.Expression[] = []
 		try {
 			// @ts-ignore - AcornJsx doesn't have typescript typings
@@ -336,8 +336,8 @@ export default class JsxParser extends React.Component<TProps> {
 
 		return (
 			this.props.renderInWrapper
-				? <View>{this.ParsedChildren}</View>
-				: <>{this.ParsedChildren}</>
+				? <Text>{this.ParsedChildren}</Text>
+				: <Text>{this.ParsedChildren}</Text>
 		)
 	}
 }
